@@ -22,9 +22,7 @@ void ASteering::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if(Paused)
-		return;
-
-	Cube1->Velocity = Seek(Cube1->GetActorLocation(), Cube2->GetActorLocation());
+	if(!Paused)
+		Cube1->Velocity = Seek(Cube1->GetActorLocation(), Cube2->GetActorLocation());
 }
 

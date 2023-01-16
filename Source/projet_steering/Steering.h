@@ -43,7 +43,7 @@ private:
 	{
 		FVector normalized = Cube2Location - Cube1Location;
 		normalized.Normalize();
-		return (normalized * Cube1->MaxSpeed) - Cube1->GetVelocity();
+		return normalized * Cube1->MaxSpeed - Cube1->Velocity;
 		/*
 		UMovementComponent* MovementComponent = Cast<UMovementComponent>(Cube1->GetComponentByClass(UFloatingPawnMovement::StaticClass()));
 		if(MovementComponent != nullptr)
