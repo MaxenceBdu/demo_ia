@@ -5,20 +5,22 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "Public/Vehicle.h"
 #include "Steering.generated.h"
 
 UCLASS(Blueprintable)
 class PROJET_STEERING_API ASteering : public AActor
 {
 	GENERATED_BODY()
-
-	float Cube1MaxSpeed;
-	
+	bool Arrived;
 public:	
 	UPROPERTY(EditAnywhere)
-		AActor* Cube1;
+		AVehicle* Cube1;
 	UPROPERTY(EditAnywhere)
-		AActor* Cube2;
+		AVehicle* Cube2;
+	UPROPERTY(EditAnywhere)
+		bool Paused;
+	
 	// Sets default values for this actor's properties
 	ASteering();
 
@@ -29,16 +31,26 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-private:
-	void Seek()
+
+	UFUNCTION(BlueprintCallable)
+	void ChangePaused()
 	{
+		Paused = !Paused;
+	}
+private:
+	
+	FVector Seek(FVector Cube1Location, FVector Cube2Location)
+	{
+		FVector normalized = Cube2Location - Cube1Location;
+		normalized.Normalize();
+		return (normalized * Cube1->MaxSpeed) - Cube1->GetVelocity();
+		/*
 		UMovementComponent* MovementComponent = Cast<UMovementComponent>(Cube1->GetComponentByClass(UFloatingPawnMovement::StaticClass()));
 		if(MovementComponent != nullptr)
 		{
-			FVector normalized = Cube2->GetActorLocation() - Cube1->GetActorLocation();
-			normalized.Normalize();
-			MovementComponent->Velocity = (normalized * Cube1MaxSpeed) - Cube1->GetVelocity();
-		}
+			
+			MovementComponent->Velocity = 
+		}*/
 	}
 
 };
