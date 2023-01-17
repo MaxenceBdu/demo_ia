@@ -12,15 +12,21 @@ UCLASS(Blueprintable)
 class PROJET_STEERING_API ASteering : public AActor
 {
 	GENERATED_BODY()
-	bool Arrived;
-public:	
+	FString Mode;
+	float Mass, MaxSpeed, MaxForce;
+	typedef FVector (ASteering::*FunctionPtrType)();
+	FunctionPtrType MovementFunction;
+public:
 	UPROPERTY(EditAnywhere)
-		AVehicle* Cube1;
+		AActor* Target;
 	UPROPERTY(EditAnywhere)
-		AVehicle* Cube2;
+		AVehicle* Vehicle;
 	UPROPERTY(EditAnywhere)
 		bool Paused;
-	
+	UPROPERTY(EditAnywhere)
+		FVector Velocity;
+
+
 	// Sets default values for this actor's properties
 	ASteering();
 
@@ -37,20 +43,64 @@ public:
 	{
 		Paused = !Paused;
 	}
-private:
-	
-	FVector Seek(FVector Cube1Location, FVector Cube2Location)
+
+	UFUNCTION(BlueprintCallable)
+	void SetCurrentMode(FString NewMode)
 	{
-		FVector normalized = Cube2Location - Cube1Location;
-		normalized.Normalize();
-		return normalized * Cube1->MaxSpeed - Cube1->Velocity;
-		/*
-		UMovementComponent* MovementComponent = Cast<UMovementComponent>(Cube1->GetComponentByClass(UFloatingPawnMovement::StaticClass()));
-		if(MovementComponent != nullptr)
+		Mode = NewMode;
+		if(Mode.Equals("Seek"))
+			MovementFunction = &ASteering::Seek;
+		else if(Mode.Equals("Flee"))
+			MovementFunction = &ASteering::Flee;
+		else
 		{
-			
-			MovementComponent->Velocity = 
-		}*/
+			MovementFunction = &ASteering::Seek;
+		}
+		
 	}
 
+	UFUNCTION(BlueprintCallable)
+	void SetMass(float NewMass)
+	{
+		Mass = NewMass;
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	void SetMaxSpeed(float NewMaxSpeed)
+	{
+		MaxSpeed = NewMaxSpeed;
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	void SetMaxForce(float NewMaxForce)
+	{
+		MaxForce = NewMaxForce;
+	}
+private:
+	
+	FVector Seek()
+	{
+		if(Target->GetActorLocation() != Vehicle->GetActorLocation())
+		{
+			FVector Normalized = Target->GetActorLocation() - Vehicle->GetActorLocation();
+			Normalized.Normalize();
+			return Normalized * MaxSpeed - Velocity;
+		}
+		return FVector(0,0,0);
+	}
+
+	FVector Flee()
+	{
+		return Seek()*-1;
+	}
+
+	FVector Pursuit()
+	{
+		return Velocity;
+	}
+
+	FVector Evade()
+	{
+		return Velocity;
+	}
 };

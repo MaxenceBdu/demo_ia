@@ -10,20 +10,8 @@ UCLASS(Blueprintable)
 class PROJET_STEERING_API AVehicle : public APawn
 {
 	GENERATED_BODY()
-	bool Paused;
 
-public:
-	FVector Velocity ;
-	
-	UPROPERTY(EditAnywhere)
-	float Mass;
-	
-	UPROPERTY(EditAnywhere)
-	float MaxForce ;
-	
-	UPROPERTY(EditAnywhere)
-	float MaxSpeed ;
-	
+public:	
 	// Sets default values for this pawn's properties
 	AVehicle();
 
@@ -37,10 +25,4 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	UFUNCTION(BlueprintCallable)
-	void ChangePaused()
-	{
-		Paused = !Paused;
-	}
 };

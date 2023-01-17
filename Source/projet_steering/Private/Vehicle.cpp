@@ -10,32 +10,18 @@ AVehicle::AVehicle()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	Paused = true;
-	Velocity = FVector(0.0,10.0,0.0);
 }
 
 // Called when the game starts or when spawned
 void AVehicle::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void AVehicle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if(!Paused)
-	{
-		const FVector SteeringForce = Velocity * MaxForce / Velocity.Length(); // truncate ( steering_direction , max_force );
-		const FVector Acceleration = SteeringForce / Mass;
-
-		Velocity = (Velocity+Acceleration) * MaxSpeed / Velocity.Length(); // truncate ( velocity + acceleration , max_speed );
-
-		SetActorLocation(GetActorLocation()+Velocity);
-		Velocity.Normalize();
-		SetActorRotation(FRotationMatrix::MakeFromXY(Velocity, Velocity).Rotator());
-	}
 }
 
 // Called to bind functionality to input
