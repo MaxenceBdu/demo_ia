@@ -1,27 +1,27 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Steering.h"
+#include "Target.h"
 
 // Sets default values
-ASteering::ASteering()
+ATarget::ATarget()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	Paused = true;
-	Mode = "";
+	PrimaryActorTick.bCanEverTick = false;
+
 }
 
 // Called when the game starts or when spawned
-void ASteering::BeginPlay()
+void ATarget::BeginPlay()
 {
 	Super::BeginPlay();
+	
 }
 
 // Called every frame
-void ASteering::Tick(float DeltaTime)
+void ATarget::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-		
+
 }
 
