@@ -30,10 +30,10 @@ void AVehicle::Tick(float DeltaTime)
 		if(GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 0.5, FColor::Red, Velocity.ToString());
 		// Update position and rotation of the vehicle
-		const FVector SteeringForce = (this->* MovementFunction)() * MaxForce / Velocity.Length(); // truncate ( steering_direction , max_force );
+		const FVector SteeringForce = (this->* MovementFunction)().GetClampedToMaxSize(MaxForce); // truncate ( steering_direction , max_force );
 		const FVector Acceleration = SteeringForce / Mass;
 
-		Velocity = (Velocity+Acceleration) * MaxSpeed / Velocity.Length(); // truncate ( velocity + acceleration , max_speed );
+		Velocity = (Velocity+Acceleration).GetClampedToMaxSize(MaxSpeed); // truncate ( velocity + acceleration , max_speed );
 	}
 	
 	SetActorLocation(GetActorLocation()+Velocity);
