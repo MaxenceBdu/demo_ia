@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Target.h"
 #include "GameFramework/Pawn.h"
 #include "Templates/SharedPointer.h"
 #include "Vehicle.generated.h"
@@ -12,26 +11,31 @@ UCLASS(Blueprintable)
 class PROJET_STEERING_API AVehicle : public APawn
 {
 	GENERATED_BODY()
-
+	
 	UPROPERTY(VisibleAnywhere)
-	ATarget* Target;
-	FVector (AVehicle::*MovementFunction)() = nullptr;
+	FVector Target;
+
+	typedef FVector (AVehicle::*FunctionPtr)();    
+	FunctionPtr MovementFunction = nullptr;
+	
 	UPROPERTY(VisibleAnywhere)
 	float Mass;
+	
 	UPROPERTY(VisibleAnywhere)
 	float MaxSpeed;
+	
 	UPROPERTY(VisibleAnywhere)
 	float MaxForce;
-	FVector Velocity, Zero = FVector::Zero();
-	bool Arrived;
 	
+	FVector Velocity;
+	bool Arrived;
 
-public:	
+public:
 	// Sets default values for this pawn's properties
 	AVehicle();
 
 	UFUNCTION(BlueprintCallable)
-	void SetTarget(ATarget* NewTarget)
+	void SetTarget(FVector NewTarget)
 	{
 		Target = NewTarget;
 	}
@@ -43,8 +47,6 @@ public:
 		{
 		case 0:
 			MovementFunction = &AVehicle::Seek;
-			if(GEngine)
-				GEngine->AddOnScreenDebugMessage(-1,15.0, FColor::Red, TEXT("aled"));
 			break;
 		case 1:
 			MovementFunction = &AVehicle::Flee;

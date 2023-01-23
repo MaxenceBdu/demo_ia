@@ -3,8 +3,6 @@
 
 #include "Vehicle.h"
 
-#include "SAdvancedRotationInputBox.h"
-
 // Sets default values
 AVehicle::AVehicle()
 {
@@ -17,6 +15,9 @@ void AVehicle::BeginPlay()
 {
 	Super::BeginPlay();
 	Arrived = false;
+	Velocity = FVector(0,0,0);
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Yellow, Velocity.ToString());
 }
 
 // Called every frame
@@ -24,27 +25,21 @@ void AVehicle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if(!Arrived)
+	if(!Arrived && MovementFunction != nullptr)
 	{
-		if(GEngine) GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, TEXT("Arrived ok"));
-		if(MovementFunction != nullptr)
-		{
-			if(GEngine) GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, TEXT("Movement ok"));
-			if(Target != nullptr)
-			{
-				if(GEngine) GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, TEXT("Target ok"));
-				// Update position and rotation of the vehicle
-				const FVector SteeringForce = (this->* MovementFunction)() * MaxForce / Velocity.Length(); // truncate ( steering_direction , max_force );
-				const FVector Acceleration = SteeringForce / Mass;
+		if(GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 0.5, FColor::Red, Velocity.ToString());
+		// Update position and rotation of the vehicle
+		const FVector SteeringForce = (this->* MovementFunction)() * MaxForce / Velocity.Length(); // truncate ( steering_direction , max_force );
+		const FVector Acceleration = SteeringForce / Mass;
 
-				Velocity = (Velocity+Acceleration) * MaxSpeed / Velocity.Length(); // truncate ( velocity + acceleration , max_speed );
-				SetActorLocation(GetActorLocation()+Velocity);
-				FVector Normalized = FVector(Velocity);
-				Normalized.Normalize();
-				SetActorRotation(FRotationMatrix::MakeFromX(Normalized).Rotator());
-			}
-		}
+		Velocity = (Velocity+Acceleration) * MaxSpeed / Velocity.Length(); // truncate ( velocity + acceleration , max_speed );
 	}
+	
+	SetActorLocation(GetActorLocation()+Velocity);
+	FVector Normalized = FVector(Velocity);
+	Normalized.Normalize();
+	SetActorRotation(FRotationMatrix::MakeFromX(Normalized).Rotator());
 		
 }
 
@@ -52,21 +47,23 @@ void AVehicle::Tick(float DeltaTime)
 void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 // Steering functions
 
 FVector AVehicle::Seek()
 {
-	if(Target->GetActorLocation() == GetActorLocation()){
+	/*if(Target == GetActorLocation()){
 		Arrived = true;
-		return Zero;
-	}
+		return FVector::Zero();
+	}*/
 	
-	FVector Normalized = Target->GetActorLocation() - GetActorLocation();
+	FVector Normalized = Target - GetActorLocation();
 	Normalized.Normalize();
-	return Normalized * MaxSpeed - Velocity;
+	FVector res = Normalized * MaxSpeed - Velocity;
+	
+	return res;
+	
 }
 
 FVector AVehicle::Flee()
@@ -88,4 +85,3 @@ FVector AVehicle::Arrival()
 {
 	return Velocity;
 }
-
