@@ -29,7 +29,7 @@ class PROJET_STEERING_API AVehicle : public APawn
 	float MaxForce;
 
 	UPROPERTY(VisibleAnywhere)
-	float Interval;
+	float SlowingDistance;
 	
 	FVector Velocity;
 	bool Arrived;
@@ -88,9 +88,9 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable)
-	void SetInterval(float NewInterval)
+	void SetSlowingDistance(float NewSlowingDistance)
 	{
-		Interval = NewInterval;
+		SlowingDistance = NewSlowingDistance;
 	}
 
 protected:

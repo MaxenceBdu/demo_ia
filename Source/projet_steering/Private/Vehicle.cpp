@@ -2,6 +2,7 @@
 
 
 #include "Vehicle.h"
+#include "GenericPlatform/GenericPlatformMath.h"
 
 // Sets default values
 AVehicle::AVehicle()
@@ -32,10 +33,11 @@ void AVehicle::Tick(float DeltaTime)
 		Velocity = (Velocity+Acceleration).GetClampedToMaxSize(MaxSpeed); // maximum magnitude clamped to MaxSpeed
 	}
 	
-	SetActorLocation(GetActorLocation()+Velocity);
+	SetActorLocation(GetActorLocation()+Velocity, true);
 	FVector Normalized = FVector(Velocity);
 	Normalized.Normalize();
-	SetActorRotation(FRotationMatrix::MakeFromX(Normalized).Rotator());
+	FRotator Rot = FRotationMatrix::MakeFromX(Normalized).Rotator();
+	SetActorRotation(FRotator(-90, Rot.Yaw, Rot.Roll));
 }
 
 // Called to bind functionality to input
@@ -60,17 +62,35 @@ FVector AVehicle::Flee()
 
 FVector AVehicle::Pursuit()
 {
-	FVector Normalized = Target->GetActorLocation()+Target->GetVelocity()*Interval - GetActorLocation();
+	double Distance = FVector::Distance(Target->GetActorLocation(), GetActorLocation());
+	/*FVector NormalizedVelocity = Velocity, NormalizedTargetVelocity = Target->GetVelocity();
+	NormalizedVelocity.Normalize();
+	NormalizedTargetVelocity.Normalize();
+	double Angle = FVector::DotProduct(NormalizedVelocity, NormalizedTargetVelocity) / (Velocity.Size()*Target->GetVelocity().Size());
+	
+	FVector Normalized = Target->GetActorLocation()+Target->GetVelocity()*(Distance*Angle) - GetActorLocation();*/
+	FVector Normalized = Target->GetActorLocation()+Target->GetVelocity()*Distance - GetActorLocation();
 	Normalized.Normalize();
 	return Normalized * MaxSpeed - Velocity;
 }
 
 FVector AVehicle::Evade()
 {
-	return Velocity;
+	return Pursuit()*-1;
 }
 
 FVector AVehicle::Arrival()
 {
-	return Velocity;
+	const FVector TargetOffset = Target->GetActorLocation() - GetActorLocation();
+	const float Distance = TargetOffset.Size();
+	const float RampedSpeed = MaxSpeed * ( Distance / SlowingDistance );
+	
+	float ClippedSpeed;
+	if(RampedSpeed < MaxSpeed)
+		ClippedSpeed = RampedSpeed;
+	else
+		ClippedSpeed = MaxSpeed;
+	
+	const FVector DesiredVelocity = ClippedSpeed / Distance * TargetOffset ;
+	return DesiredVelocity - Velocity ;
 }
