@@ -16,8 +16,6 @@ void AVehicle::BeginPlay()
 	Super::BeginPlay();
 	Arrived = false;
 	Velocity = FVector(0,0,0);
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Yellow, Velocity.ToString());
 }
 
 // Called every frame
@@ -25,22 +23,19 @@ void AVehicle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if(!Arrived && MovementFunction != nullptr)
+	if(!Arrived && MovementFunction != nullptr && Target != nullptr)
 	{
-		if(GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 0.5, FColor::Red, Velocity.ToString());
 		// Update position and rotation of the vehicle
-		const FVector SteeringForce = (this->* MovementFunction)().GetClampedToMaxSize(MaxForce); // truncate ( steering_direction , max_force );
+		const FVector SteeringForce = (this->* MovementFunction)().GetClampedToMaxSize(MaxForce); // maximum magnitude clamped to MaxForce
 		const FVector Acceleration = SteeringForce / Mass;
 
-		Velocity = (Velocity+Acceleration).GetClampedToMaxSize(MaxSpeed); // truncate ( velocity + acceleration , max_speed );
+		Velocity = (Velocity+Acceleration).GetClampedToMaxSize(MaxSpeed); // maximum magnitude clamped to MaxSpeed
 	}
 	
 	SetActorLocation(GetActorLocation()+Velocity);
 	FVector Normalized = FVector(Velocity);
 	Normalized.Normalize();
 	SetActorRotation(FRotationMatrix::MakeFromX(Normalized).Rotator());
-		
 }
 
 // Called to bind functionality to input
@@ -53,17 +48,9 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 FVector AVehicle::Seek()
 {
-	/*if(Target == GetActorLocation()){
-		Arrived = true;
-		return FVector::Zero();
-	}*/
-	
-	FVector Normalized = Target - GetActorLocation();
+	FVector Normalized = Target->GetActorLocation() - GetActorLocation();
 	Normalized.Normalize();
-	FVector res = Normalized * MaxSpeed - Velocity;
-	
-	return res;
-	
+	return Normalized * MaxSpeed - Velocity;	
 }
 
 FVector AVehicle::Flee()
@@ -73,7 +60,9 @@ FVector AVehicle::Flee()
 
 FVector AVehicle::Pursuit()
 {
-	return Velocity;
+	FVector Normalized = Target->GetActorLocation()+Target->GetVelocity()*Interval - GetActorLocation();
+	Normalized.Normalize();
+	return Normalized * MaxSpeed - Velocity;
 }
 
 FVector AVehicle::Evade()

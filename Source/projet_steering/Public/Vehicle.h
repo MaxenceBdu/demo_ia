@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Kismet/GameplayStatics.h"
 #include "Templates/SharedPointer.h"
 #include "Vehicle.generated.h"
 
@@ -13,7 +14,7 @@ class PROJET_STEERING_API AVehicle : public APawn
 	GENERATED_BODY()
 	
 	UPROPERTY(VisibleAnywhere)
-	FVector Target;
+	AActor* Target = nullptr;
 
 	typedef FVector (AVehicle::*FunctionPtr)();    
 	FunctionPtr MovementFunction = nullptr;
@@ -26,6 +27,9 @@ class PROJET_STEERING_API AVehicle : public APawn
 	
 	UPROPERTY(VisibleAnywhere)
 	float MaxForce;
+
+	UPROPERTY(VisibleAnywhere)
+	float Interval;
 	
 	FVector Velocity;
 	bool Arrived;
@@ -35,7 +39,7 @@ public:
 	AVehicle();
 
 	UFUNCTION(BlueprintCallable)
-	void SetTarget(FVector NewTarget)
+	void SetTarget(AActor* NewTarget)
 	{
 		Target = NewTarget;
 	}
@@ -81,6 +85,12 @@ public:
 	void SetMaxForce(float NewMaxForce)
 	{
 		MaxForce = NewMaxForce;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	void SetInterval(float NewInterval)
+	{
+		Interval = NewInterval;
 	}
 
 protected:
