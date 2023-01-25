@@ -66,6 +66,7 @@ FVector AVehicle::Pursuit()
 	/*FVector NormalizedVelocity = Velocity, NormalizedTargetVelocity = Target->GetVelocity();
 	NormalizedVelocity.Normalize();
 	NormalizedTargetVelocity.Normalize();
+	
 	double Angle = FVector::DotProduct(NormalizedVelocity, NormalizedTargetVelocity) / (Velocity.Size()*Target->GetVelocity().Size());
 	
 	FVector Normalized = Target->GetActorLocation()+Target->GetVelocity()*(Distance*Angle) - GetActorLocation();*/
