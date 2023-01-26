@@ -23,6 +23,18 @@ void AVehicle::BeginPlay()
 void AVehicle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if(Circuit.Num() == 0 && Target == nullptr)
+		Velocity = FVector::Zero();
+
+	if(Circuit.Num() > 0)
+	{
+		if(GetActorLocation() == Target->GetActorLocation())
+		{
+			Target = Circuit[++TargetId];
+		}
+		
+	}
 	
 	if(!Arrived && MovementFunction != nullptr && Target != nullptr)
 	{

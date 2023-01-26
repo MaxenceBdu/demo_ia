@@ -8,6 +8,13 @@
 #include "Templates/SharedPointer.h"
 #include "Vehicle.generated.h"
 
+enum ECircuitMode
+{
+	Circuit,
+	OneWay,
+	TwoWays
+};
+
 UCLASS(Blueprintable)
 class PROJET_STEERING_API AVehicle : public APawn
 {
@@ -30,9 +37,13 @@ class PROJET_STEERING_API AVehicle : public APawn
 
 	UPROPERTY(VisibleAnywhere)
 	float SlowingDistance;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<AActor*> Circuit;
 	
 	FVector Velocity;
 	bool Arrived;
+	int TargetId;
 
 public:
 	// Sets default values for this pawn's properties
@@ -42,6 +53,29 @@ public:
 	void SetTarget(AActor* NewTarget)
 	{
 		Target = NewTarget;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	void CleanTarget()
+	{
+		Target = nullptr;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	void SetCircuit(TArray<AActor*> NewCircuit)
+	{
+		Circuit = NewCircuit;
+		TargetId = 0;
+		SetTarget(Circuit[TargetId]);
+		MovementFunction = &AVehicle::Seek;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	void CleanCircuit()
+	{
+		CleanTarget();
+		Circuit.Empty();
+		TargetId = 0;
 	}
 
 	UFUNCTION(BlueprintCallable)
