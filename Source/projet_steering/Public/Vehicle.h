@@ -2,9 +2,10 @@
 
 #pragma once
 
+#include <string>
+
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "Kismet/GameplayStatics.h"
 #include "Templates/SharedPointer.h"
 #include "Vehicle.generated.h"
 
@@ -43,7 +44,7 @@ class PROJET_STEERING_API AVehicle : public APawn
 	
 	FVector Velocity;
 	bool Arrived;
-	int TargetId;
+	int TargetId, CircuitMode;
 
 public:
 	// Sets default values for this pawn's properties
@@ -58,7 +59,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CleanTarget()
 	{
-		Target = nullptr;
+		if(Target != nullptr)
+			Target = nullptr;
 	}
 
 	UFUNCTION(BlueprintCallable)
@@ -74,8 +76,10 @@ public:
 	void CleanCircuit()
 	{
 		CleanTarget();
-		Circuit.Empty();
+		if(Circuit.Num() > 0)
+			Circuit.Empty();
 		TargetId = 0;
+		Velocity == FVector::Zero();
 	}
 
 	UFUNCTION(BlueprintCallable)
@@ -125,6 +129,12 @@ public:
 	void SetSlowingDistance(float NewSlowingDistance)
 	{
 		SlowingDistance = NewSlowingDistance;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	void SetCircuitMode(int NewCircuitMode)
+	{
+		CircuitMode = NewCircuitMode;
 	}
 
 protected:

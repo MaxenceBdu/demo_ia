@@ -3,6 +3,7 @@
 
 #include "Vehicle.h"
 #include "GenericPlatform/GenericPlatformMath.h"
+#include "Algo/Reverse.h"
 
 // Sets default values
 AVehicle::AVehicle()
@@ -27,24 +28,51 @@ void AVehicle::Tick(float DeltaTime)
 	if(Circuit.Num() == 0 && Target == nullptr)
 		Velocity = FVector::Zero();
 
+	// If in Circuit/One way/Two ways mode
 	if(Circuit.Num() > 0)
 	{
-		if(GetActorLocation() == Target->GetActorLocation())
-		{
-			Target = Circuit[++TargetId];
-		}
+		// Circuit Mode 0 = Circuit
+		// Circuit Mode 1 = OneWay
+		// Circuit Mode 2 = TwoWays
 		
+		// And if target is reached, change target
+		if(GetActorLocation().Equals(Target->GetActorLocation(), 30.0))
+		{
+			if(TargetId == Circuit.Num()-1)
+			{
+				if(CircuitMode == 1) // one way, stop at the end of the path
+				{
+					Target = nullptr;
+					Velocity == FVector::Zero();
+				}else
+				{
+					if(CircuitMode == 2) // two ways, follow the path backwards
+						Algo::Reverse(Circuit);
+					TargetId = 0; // reset circuit
+				}
+			}else
+			{
+				if(TargetId == Circuit.Num()-2 && CircuitMode != 0)
+					// when aiming for the last target of the path, switch to Arrival()
+					MovementFunction = &AVehicle::Arrival;
+				else if(TargetId == 0 && CircuitMode == 2) // MovementFunction previously was Arrival() so we're back to Seek()
+					MovementFunction = &AVehicle::Seek;
+				++TargetId;
+			}
+			Target = Circuit[TargetId];
+		}
 	}
 	
 	if(!Arrived && MovementFunction != nullptr && Target != nullptr)
 	{
-		// Update position and rotation of the vehicle
+		// Work out the velocity
 		const FVector SteeringForce = (this->* MovementFunction)().GetClampedToMaxSize(MaxForce); // maximum magnitude clamped to MaxForce
 		const FVector Acceleration = SteeringForce / Mass;
 
 		Velocity = (Velocity+Acceleration).GetClampedToMaxSize(MaxSpeed); // maximum magnitude clamped to MaxSpeed
 	}
-	
+
+	// Update position and rotation of the vehicle
 	SetActorLocation(GetActorLocation()+Velocity, true);
 	FVector Normalized = FVector(Velocity);
 	Normalized.Normalize();
