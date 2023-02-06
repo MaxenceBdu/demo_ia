@@ -16,7 +16,6 @@ AVehicle::AVehicle()
 void AVehicle::BeginPlay()
 {
 	Super::BeginPlay();
-	Arrived = false;
 	Velocity = FVector(0,0,0);
 }
 
@@ -43,7 +42,6 @@ void AVehicle::Tick(float DeltaTime)
 				if(CircuitMode == 1) // one way, stop at the end of the path
 				{
 					Target = nullptr;
-					Velocity == FVector::Zero();
 				}else
 				{
 					if(CircuitMode == 2) // two ways, follow the path backwards
@@ -63,7 +61,7 @@ void AVehicle::Tick(float DeltaTime)
 		}
 	}
 	
-	if(!Arrived && MovementFunction != nullptr && Target != nullptr)
+	if(MovementFunction != nullptr && Target != nullptr)
 	{
 		// Work out the velocity
 		const FVector SteeringForce = (this->* MovementFunction)().GetClampedToMaxSize(MaxForce); // maximum magnitude clamped to MaxForce
@@ -102,15 +100,8 @@ FVector AVehicle::Flee()
 
 FVector AVehicle::Pursuit()
 {
-	double Distance = FVector::Distance(Target->GetActorLocation(), GetActorLocation());
-	/*FVector NormalizedVelocity = Velocity, NormalizedTargetVelocity = Target->GetVelocity();
-	NormalizedVelocity.Normalize();
-	NormalizedTargetVelocity.Normalize();
-	
-	double Angle = FVector::DotProduct(NormalizedVelocity, NormalizedTargetVelocity) / (Velocity.Size()*Target->GetVelocity().Size());
-	
-	FVector Normalized = Target->GetActorLocation()+Target->GetVelocity()*(Distance*Angle) - GetActorLocation();*/
-	FVector Normalized = Target->GetActorLocation()+Target->GetVelocity()*Distance - GetActorLocation();
+	const double Distance = FVector::DistXY(Target->GetActorLocation(), GetActorLocation());
+	FVector Normalized = Target->GetActorLocation()+Target->GetVelocity()*(Distance/MaxSpeed) - GetActorLocation();
 	Normalized.Normalize();
 	return Normalized * MaxSpeed - Velocity;
 }

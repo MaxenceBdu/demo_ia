@@ -43,7 +43,6 @@ class PROJET_STEERING_API AVehicle : public APawn
 	TArray<AActor*> Circuit;
 	
 	FVector Velocity;
-	bool Arrived;
 	int TargetId, CircuitMode;
 
 public:
