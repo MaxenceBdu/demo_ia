@@ -65,8 +65,9 @@ void AVehicle::Tick(float DeltaTime)
 	{
 		// Work out the velocity
 		const FVector SteeringForce = (this->* MovementFunction)().GetClampedToMaxSize(MaxForce); // maximum magnitude clamped to MaxForce
-		const FVector Acceleration = SteeringForce / Mass;
-
+		FVector Acceleration = SteeringForce / Mass;
+		Acceleration.Z = 0;
+		
 		Velocity = (Velocity+Acceleration).GetClampedToMaxSize(MaxSpeed); // maximum magnitude clamped to MaxSpeed
 	}
 
@@ -100,10 +101,9 @@ FVector AVehicle::Flee()
 
 FVector AVehicle::Pursuit()
 {
-	const double Distance = FVector::DistXY(Target->GetActorLocation(), GetActorLocation());
-	FVector Normalized = Target->GetActorLocation()+Target->GetVelocity()*(Distance/MaxSpeed) - GetActorLocation();
-	Normalized.Normalize();
-	return Normalized * MaxSpeed - Velocity;
+	const double Distance = FVector::Dist(Target->GetActorLocation(), GetActorLocation());
+	const FVector Direction = Target->GetActorLocation()+Target->GetVelocity().GetSafeNormal()*Distance - GetActorLocation();
+	return Direction * MaxSpeed - Velocity;
 }
 
 FVector AVehicle::Evade()
